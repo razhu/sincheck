@@ -30,36 +30,34 @@ app.get('/', function(req, res) {
 //////////////////////////////////////////////// INSTANCIA DE 'ROUTES' PARA LAS RUTAS DE LA API
 var apiRoutes = express.Router();
 //////////////////////////////////////////////// INICIO AUTENTICACION (no se requiere middleware pues no es una ruta protegida)
-apiRoutes.post('/validarNit', function(req, res) {
-        model.usuario.findOne({
-		where: {usuario: req.body.usuario}
-	}).then(function(usuario){       
-       if(!validate({checkpresence:req.body.usuario}))
-		{
-			res.status(400).json({ mensaje: 'Falta el parámetro \'usuario\'' });
-		}else if(!validate({checkpresence:req.body.contrasena}))
-			{
-				res.status(400).json({ mensaje: 'Falta el parámetro \'contrasena\'' });
-			}else if (!usuario) {
-			res.status(401).json({ mensaje: "Nombre de usuario o contraseña inválidos." });
-		} else if (usuario) {
-			// verifica si las contraseñas son iguales
-			if (!bcrypt.compareSync(req.body.contrasena, usuario.contrasena)) {
-				res.status(401).json({ mensaje: "Nombre de usuario o contraseña inválidos." });
-			} else {
-
-				// si el usuario y al contraseña son correctas, se crea un token
-				var token = jwt.sign({"usuario":usuario.usuario}, app.get('superSecreto'), {
-					expiresIn: "24h" // token expira en 24 horas
-				});
-				res.header('Content-Type', 'application/json');
-				res.status(201).json({
-					token: token
-				});
-			}
-		}else{
-			res.status(500).json({mensaje:'error interno'});
-		}
+apiRoutes.post('/validarNIT', function(req, res) {
+        model.user.findOne({
+            where: {
+                nit: req.body.nit
+            }
+	}).then(function(usuario){
+        if(usuario!=null){
+        if ((req.body.usuario !== usuario.usuario) || (req.body.contrasena !== usuario.contrasena)) {
+	 			res.status(401).json({ 
+                   finalizado:false,
+                        mensaje:"No existe el nit",
+                        datos:null  
+                    
+                });
+	 		}else{
+                var resp = {verificacion: true, estado: 'ACTIVO', error: ''}; 
+                res.json({  finalizado:true,
+                    mensaje: 'Datos del SIN validados correctamente',
+                    datos: resp}); 
+             }
+             }else{
+                 	 			res.status(401).json({ 
+                   finalizado:false,
+                        mensaje:"No existe el nit",
+                        datos:null  
+                    
+                });
+             }
 	}).catch(function(error){
 		console.log(error.stack);
 		res.status(500).json({mensaje:error.message});

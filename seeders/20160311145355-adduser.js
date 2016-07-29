@@ -2,7 +2,7 @@
 module.exports = {
     up: function(queryInterface, Sequelize) {
         var fecha = new Date();
-        return queryInterface.bulkInsert('usuarios', [
+        return queryInterface.bulkInsert('users', [
 
             {
                 nit: 12345678,
